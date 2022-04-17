@@ -1,31 +1,48 @@
-/**
- * This file will automatically be loaded by webpack and run in the "renderer" context.
- * To learn more about the differences between the "main" and the "renderer" context in
- * Electron, visit:
- *
- * https://electronjs.org/docs/tutorial/application-architecture#main-and-renderer-processes
- *
- * By default, Node.js integration in this file is disabled. When enabling Node.js integration
- * in a renderer process, please be aware of potential security implications. You can read
- * more about security risks here:
- *
- * https://electronjs.org/docs/tutorial/security
- *
- * To enable Node.js integration in this file, open up `main.js` and enable the `nodeIntegration`
- * flag:
- *
- * ```
- *  // Create the browser window.
- *  mainWindow = new BrowserWindow({
- *    width: 800,
- *    height: 600,
- *    webPreferences: {
- *      nodeIntegration: true
- *    }
- *  });
- * ```
- */
+import "./index.css";
 
-import './index.css';
+const input = document.getElementById("input");
+const message = document.getElementById("message");
+const errorMessage = document.getElementById("errorMessage");
+const successMessage = document.getElementById("successMessage");
 
-console.log('👋 This message is being logged by "renderer.js", included via webpack');
+let fileName;
+
+input.addEventListener("change", (e) => {
+  e.preventDefault();
+  const file = e.target.files[0];
+  clear();
+  if (file) {
+    input.disabled = true;
+    fileName = file.name;
+    message.innerText = "VALIDATING - " + fileName;
+    file.arrayBuffer().then((arrayBuffer) => {
+      window.api.processVideo({
+        arrayBuffer,
+        fileName,
+      });
+    });
+  }
+});
+
+window.api.on("progress", (data) => {
+  message.innerText = `CONVERTING - "${fileName}" : ${data.current}/${
+    data.total
+  } - ${((data.current / data.total) * 100).toFixed()}%`;
+});
+window.api.on("error", (error) => {
+  clear();
+  console.log(error);
+  errorMessage.innerText = error.message;
+});
+window.api.on("end", () => {
+  clear();
+  successMessage.innerText = "Successfully to convert : " + fileName;
+});
+
+function clear() {
+  input.value = null;
+  input.disabled = false;
+  message.innerText = "DROP VIDEO HERE OR CLICK";
+  errorMessage.innerText = "";
+  successMessage.innerText = "";
+}

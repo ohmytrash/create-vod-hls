@@ -19,7 +19,11 @@
   "license": "MIT",
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "extraResource": [
+          "./create-vod-hls.sh"
+        ]
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
@@ -53,7 +57,10 @@
                 {
                   "html": "./src/index.html",
                   "js": "./src/renderer.js",
-                  "name": "main_window"
+                  "name": "main_window",
+                  "preload": {
+                    "js": "./src/preload.js"
+                  }
                 }
               ]
             }
@@ -76,6 +83,10 @@
     "style-loader": "^3.0.0"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0"
+    "adm-zip": "^0.5.9",
+    "del": "^6.0.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "file-type": "^17.1.1",
+    "tree-kill": "^1.2.2"
   }
 }
